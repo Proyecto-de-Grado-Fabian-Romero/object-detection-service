@@ -14,8 +14,6 @@ def convert_to_perspective(
     height, width = equirect_img.shape[:2]
     w_out, h_out = output_size
 
-    fov_rad = radians(fov)
-
     # Create normalized 3D directions for each pixel
     x = np.linspace(-1, 1, w_out)
     y = np.linspace(-1, 1, h_out)
