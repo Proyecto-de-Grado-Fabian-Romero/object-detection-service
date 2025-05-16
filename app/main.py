@@ -2,6 +2,7 @@ from flask import Flask
 from flasgger import Swagger
 from app.routes.preprocess_routes import preprocess_blueprint  # type: ignore
 
+
 def create_app():
     app = Flask(__name__)
 
