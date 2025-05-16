@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 from app.entities.view_metadata import ViewMetadata
 
+
 def save_views(output_dir: str, views: List[Tuple[np.ndarray, ViewMetadata]]):
     os.makedirs(output_dir, exist_ok=True)
 

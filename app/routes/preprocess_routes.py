@@ -7,6 +7,7 @@ preprocess_blueprint = Blueprint("preprocess", __name__)
 
 UPLOAD_FOLDER = "temp_uploads"
 
+
 @preprocess_blueprint.route("/", methods=["POST"])
 @preprocess_blueprint.route("/", methods=["POST"])
 def preprocess():
@@ -48,9 +49,6 @@ def preprocess():
         file.save(filepath)
 
         output_dir = preprocess_image(filepath, "output_views")
-        results.append({
-            "input_file": filename,
-            "output_path": output_dir
-        })
+        results.append({"input_file": filename, "output_path": output_dir})
 
     return jsonify(results)

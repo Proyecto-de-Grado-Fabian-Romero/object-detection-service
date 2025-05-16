@@ -3,12 +3,13 @@ import cv2
 from math import radians, sin, cos
 from typing import Tuple
 
+
 def convert_to_perspective(
     equirect_img: np.ndarray,
     yaw: float,
     pitch: float,
     fov: float,
-    output_size: Tuple[int, int]
+    output_size: Tuple[int, int],
 ) -> np.ndarray:
     height, width = equirect_img.shape[:2]
     w_out, h_out = output_size
@@ -28,16 +29,20 @@ def convert_to_perspective(
     yaw_rad = radians(yaw)
     pitch_rad = radians(pitch)
 
-    Ry = np.array([
-        [cos(yaw_rad), 0, sin(yaw_rad)],
-        [0, 1, 0],
-        [-sin(yaw_rad), 0, cos(yaw_rad)],
-    ])
-    Rx = np.array([
-        [1, 0, 0],
-        [0, cos(pitch_rad), -sin(pitch_rad)],
-        [0, sin(pitch_rad), cos(pitch_rad)],
-    ])
+    Ry = np.array(
+        [
+            [cos(yaw_rad), 0, sin(yaw_rad)],
+            [0, 1, 0],
+            [-sin(yaw_rad), 0, cos(yaw_rad)],
+        ]
+    )
+    Rx = np.array(
+        [
+            [1, 0, 0],
+            [0, cos(pitch_rad), -sin(pitch_rad)],
+            [0, sin(pitch_rad), cos(pitch_rad)],
+        ]
+    )
     R = Rx @ Ry
 
     directions_rot = directions @ R.T
@@ -53,5 +58,11 @@ def convert_to_perspective(
     map_x = u.astype(np.float32)
     map_y = v.astype(np.float32)
 
-    result = cv2.remap(equirect_img, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
+    result = cv2.remap(
+        equirect_img,
+        map_x,
+        map_y,
+        interpolation=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_WRAP,
+    )
     return result

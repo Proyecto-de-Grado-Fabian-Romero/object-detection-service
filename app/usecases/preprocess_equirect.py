@@ -5,6 +5,7 @@ from app.entities.view_metadata import ViewMetadata
 from app.adapters.image_processing.perspective_converter import convert_to_perspective
 from app.gateways.file_storage import save_views
 
+
 def preprocess_image(image_path: str, output_base_dir: str) -> str:
     img = cv2.imread(image_path)
 
@@ -19,7 +20,6 @@ def preprocess_image(image_path: str, output_base_dir: str) -> str:
             persp = convert_to_perspective(img, yaw, pitch, fov, output_size)
             meta = ViewMetadata(filename="", yaw=yaw, pitch=pitch, fov=fov)
             views.append((persp, meta))
-
 
     folder_id = str(uuid.uuid4())
     output_dir = os.path.join(output_base_dir, folder_id)
