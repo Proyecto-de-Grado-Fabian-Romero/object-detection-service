@@ -44,3 +44,5 @@ Thumbs.db
 
 # GitHub Actions artifacts
 *.coverage
+output_views
+temp_uploads
