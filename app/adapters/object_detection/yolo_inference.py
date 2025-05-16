@@ -2,7 +2,7 @@ import cv2
 from ultralytics import YOLO
 
 
-def load_model(model_path: str = "best.pt") -> YOLO:
+def load_model(model_path: str = "models/yolo11x.pt") -> YOLO:
     return YOLO(model_path)
 
 
