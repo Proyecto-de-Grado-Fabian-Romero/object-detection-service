@@ -1,7 +1,8 @@
 from flasgger import Swagger
 from flask import Flask
 
-from app.routes.preprocess_routes import preprocess_blueprint  # type: ignore
+from app.routes.detect_routes import detect_blueprint
+from app.routes.preprocess_routes import preprocess_blueprint
 
 
 def create_app():
@@ -13,9 +14,8 @@ def create_app():
     }
     Swagger(app)
 
-    # Register route blueprints
     app.register_blueprint(preprocess_blueprint, url_prefix="/preprocess")
-    # app.register_blueprint(detect_blueprint, url_prefix="/detect")
+    app.register_blueprint(detect_blueprint, url_prefix="/detect360")
 
     return app
 
