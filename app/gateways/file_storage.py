@@ -1,9 +1,10 @@
-import os
 import json
+import os
 from typing import List, Tuple
 
 import cv2
 import numpy as np
+
 from app.entities.view_metadata import ViewMetadata
 
 
