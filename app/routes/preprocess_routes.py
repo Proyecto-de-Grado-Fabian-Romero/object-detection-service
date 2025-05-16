@@ -8,7 +8,33 @@ preprocess_blueprint = Blueprint("preprocess", __name__)
 UPLOAD_FOLDER = "temp_uploads"
 
 @preprocess_blueprint.route("/", methods=["POST"])
+@preprocess_blueprint.route("/", methods=["POST"])
 def preprocess():
+    """
+    Preprocess 360º equirectangular images
+
+    ---
+    consumes:
+      - multipart/form-data
+    parameters:
+      - in: formData
+        name: files
+        type: file
+        required: true
+        description: One or more 360º .jpg or .png images
+    responses:
+      200:
+        description: Preprocessing result
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              input_file:
+                type: string
+              output_path:
+                type: string
+    """
     files = request.files.getlist("files")
     if not files:
         return jsonify({"error": "No files uploaded"}), 400
@@ -28,4 +54,3 @@ def preprocess():
         })
 
     return jsonify(results)
-
