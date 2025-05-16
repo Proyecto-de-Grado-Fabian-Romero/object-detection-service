@@ -1,5 +1,6 @@
-from flask import Flask
 from flasgger import Swagger
+from flask import Flask
+
 from app.routes.preprocess_routes import preprocess_blueprint  # type: ignore
 
 

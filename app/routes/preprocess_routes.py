@@ -1,6 +1,8 @@
-from flask import Blueprint, request, jsonify
 import os
+
+from flask import Blueprint, jsonify, request
 from werkzeug.utils import secure_filename
+
 from app.usecases.preprocess_equirect import preprocess_image
 
 preprocess_blueprint = Blueprint("preprocess", __name__)
