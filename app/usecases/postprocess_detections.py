@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import cv2
 import numpy as np
@@ -41,7 +41,7 @@ def non_max_suppression(boxes, scores, iou_threshold=0.5):
 
 def postprocess_detections_with_tracking(
     detections: List[Dict], original_360_img_path: str, iou_threshold=0.05
-) -> Dict[str, int]:
+) -> Dict[int, Dict[str, Union[str, int]]]:
     """
     Aplica NMS global y luego DeepSORT para tracking.
     Devuelve conteo de objetos únicos con nombres en español.
