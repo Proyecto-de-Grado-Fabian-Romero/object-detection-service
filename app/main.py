@@ -1,9 +1,9 @@
 from flasgger import Swagger
 from flask import Flask
 
-from app.routes.process_routes import process_blueprint
-from app.routes.preprocess_routes import preprocess_blueprint
 from app.routes.detect_routes import detect_blueprint
+from app.routes.preprocess_routes import preprocess_blueprint
+from app.routes.process_routes import process_blueprint
 
 
 def create_app():

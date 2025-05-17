@@ -1,17 +1,20 @@
-from flask import Blueprint, request, jsonify
 import os
+from io import BytesIO
+
 import requests
+from flask import Blueprint, jsonify, request
+from PIL import Image
 from werkzeug.utils import secure_filename
+
+from app.usecases.postprocess_detections import postprocess_detections_with_tracking
 from app.usecases.preprocess_equirect import preprocess_image
 from app.usecases.run_object_detection import run_detection_on_folder
-from app.usecases.postprocess_detections import postprocess_detections_with_tracking
-from io import BytesIO
-from PIL import Image
 
 detect_blueprint = Blueprint("detect", __name__)
 
 UPLOAD_FOLDER = "temp_uploads"
 PREPROCESS_OUTPUT = "output_views"
+
 
 @detect_blueprint.route("/", methods=["POST"])
 def detect():
@@ -60,7 +63,7 @@ def detect():
     for url in image_urls:
         try:
             response = requests.get(url)
-            response.raise_for_status() 
+            response.raise_for_status()
 
             image = Image.open(BytesIO(response.content))
             filename = secure_filename(url.split("/")[-1])
@@ -79,10 +82,10 @@ def detect():
                 aggregated_objects[class_id]["count"] += data["count"]
 
             # Delete images
-            os.remove(filepath) 
+            os.remove(filepath)
             for preprocessed_img in os.listdir(folder):
                 os.remove(os.path.join(folder, preprocessed_img))
-            os.rmdir(folder)  
+            os.rmdir(folder)
 
         except requests.exceptions.RequestException as e:
             return jsonify({"error": f"Failed to download image: {str(e)}"}), 400

@@ -1,5 +1,7 @@
+from math import asin, atan2, cos, pi, radians, sin
+
 import numpy as np
-from math import radians, sin, cos, asin, atan2, pi
+
 
 def perspective_bbox_to_equirectangular(
     bbox: list,  # [xmin, ymin, xmax, ymax] in view coords
@@ -9,7 +11,7 @@ def perspective_bbox_to_equirectangular(
     pitch: float,
     fov: float,
     w_eq: int,
-    h_eq: int
+    h_eq: int,
 ) -> list:
     """
     Converts the perspective view bbox to an equirectangular image bbox.
@@ -34,17 +36,17 @@ def perspective_bbox_to_equirectangular(
     yaw_rad = radians(yaw)
     pitch_rad = radians(pitch)
 
-    Ry = np.array([
-        [cos(yaw_rad), 0, sin(yaw_rad)],
-        [0, 1, 0],
-        [-sin(yaw_rad), 0, cos(yaw_rad)]
-    ])
+    Ry = np.array(
+        [[cos(yaw_rad), 0, sin(yaw_rad)], [0, 1, 0], [-sin(yaw_rad), 0, cos(yaw_rad)]]
+    )
 
-    Rx = np.array([
-        [1, 0, 0],
-        [0, cos(pitch_rad), -sin(pitch_rad)],
-        [0, sin(pitch_rad), cos(pitch_rad)]
-    ])
+    Rx = np.array(
+        [
+            [1, 0, 0],
+            [0, cos(pitch_rad), -sin(pitch_rad)],
+            [0, sin(pitch_rad), cos(pitch_rad)],
+        ]
+    )
 
     R = Rx @ Ry
 
@@ -57,7 +59,7 @@ def perspective_bbox_to_equirectangular(
     ]
 
     uv_points = []
-    for (x, y) in corners:
+    for x, y in corners:
         dir_cam = pixel_to_dir(x, y)
         dir_world = R @ dir_cam
 

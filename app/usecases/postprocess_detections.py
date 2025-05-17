@@ -1,9 +1,14 @@
+from typing import Dict, List
+
 import cv2
 import numpy as np
-from typing import List, Dict
-from app.adapters.image_processing.coordinate_mapper import perspective_bbox_to_equirectangular
-from app.entities.class_names import CLASS_ID_TO_NAME
+
+from app.adapters.image_processing.coordinate_mapper import (
+    perspective_bbox_to_equirectangular,
+)
 from app.adapters.tracking.deep_sort_tracking import DeepSortTracker  # tu clase
+from app.entities.class_names import CLASS_ID_TO_NAME
+
 
 def non_max_suppression(boxes, scores, iou_threshold=0.5):
     x1 = boxes[:, 0]
@@ -35,9 +40,7 @@ def non_max_suppression(boxes, scores, iou_threshold=0.5):
 
 
 def postprocess_detections_with_tracking(
-    detections: List[Dict],
-    original_360_img_path: str,
-    iou_threshold=0.05
+    detections: List[Dict], original_360_img_path: str, iou_threshold=0.05
 ) -> Dict[str, int]:
     """
     Aplica NMS global y luego DeepSORT para tracking.
@@ -46,7 +49,9 @@ def postprocess_detections_with_tracking(
 
     img_360 = cv2.imread(original_360_img_path)
     if img_360 is None:
-        raise FileNotFoundError(f"Original 360 image not found: {original_360_img_path}")
+        raise FileNotFoundError(
+            f"Original 360 image not found: {original_360_img_path}"
+        )
 
     h_eq, w_eq = img_360.shape[:2]
     tracker = DeepSortTracker()
@@ -92,20 +97,21 @@ def postprocess_detections_with_tracking(
 
         filtered_boxes.extend(boxes_class[keep])
         filtered_scores.extend(scores_class[keep])
-        filtered_class_ids.extend([class_id]*len(keep))
+        filtered_class_ids.extend([class_id] * len(keep))
 
     # Prepare detections for DeepSORT
     detections_for_tracking = []
-    for bbox, score, class_id in zip(filtered_boxes, filtered_scores, filtered_class_ids):
+    for bbox, score, class_id in zip(
+        filtered_boxes, filtered_scores, filtered_class_ids
+    ):
         detections_for_tracking.append([bbox, score, class_id])
-        
+
     print(detections_for_tracking)
-            
+
     detections_for_tracking = [
-        [det[0], det[1], det[2]]
-        for det in detections_for_tracking
+        [det[0], det[1], det[2]] for det in detections_for_tracking
     ]
-    
+
     # Update tracker with equirectangular image and filtered detections
     tracked_objects = tracker.update(img_360, detections_for_tracking)
 
@@ -114,10 +120,7 @@ def postprocess_detections_with_tracking(
     for obj in tracked_objects:
         track_id = obj["track_id"]
         if track_id not in objects_by_id:
-            objects_by_id[track_id] = {
-                "class_id": obj["class_id"],
-                "count": 0
-            }
+            objects_by_id[track_id] = {"class_id": obj["class_id"], "count": 0}
         objects_by_id[track_id]["count"] += 1
 
     # Group by name, id and count objects
@@ -128,10 +131,7 @@ def postprocess_detections_with_tracking(
         name = CLASS_ID_TO_NAME.get(class_id)
         if name:
             if class_id_str not in result:
-                result[class_id_str] = {
-                    "name": name,
-                    "count": 1
-                }
+                result[class_id_str] = {"name": name, "count": 1}
             else:
                 result[class_id_str]["count"] += 1
 
