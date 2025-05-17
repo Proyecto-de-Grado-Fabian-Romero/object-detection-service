@@ -8,6 +8,7 @@ from app.adapters.image_processing.coordinate_mapper import (
 )
 from app.adapters.tracking.deep_sort_tracking import DeepSortTracker  # tu clase
 from app.entities.class_names import CLASS_ID_TO_NAME
+from app.typing.class_stats import ClassStats
 
 
 def non_max_suppression(boxes, scores, iou_threshold=0.5):
@@ -41,7 +42,7 @@ def non_max_suppression(boxes, scores, iou_threshold=0.5):
 
 def postprocess_detections_with_tracking(
     detections: List[Dict], original_360_img_path: str, iou_threshold=0.05
-) -> Dict[int, Dict[str, Union[str, int]]]:
+) -> Dict[str, ClassStats]:
     """
     Aplica NMS global y luego DeepSORT para tracking.
     Devuelve conteo de objetos únicos con nombres en español.
@@ -124,7 +125,7 @@ def postprocess_detections_with_tracking(
         objects_by_id[track_id]["count"] += 1
 
     # Group by name, id and count objects
-    result = {}
+    result: Dict[str, ClassStats] = {}
     for obj in objects_by_id.values():
         class_id = obj["class_id"]
         class_id_str = str(class_id)

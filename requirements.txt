@@ -80,6 +80,7 @@ tqdm==4.67.1
 triton==3.3.0
 typing-inspection==0.4.0
 typing_extensions==4.13.2
+types-requests==2.32.0.20250515
 tzdata==2025.2
 ultralytics==8.3.136
 ultralytics-thop==2.0.14
