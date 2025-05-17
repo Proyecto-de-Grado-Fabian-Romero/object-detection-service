@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import cv2
 import numpy as np
@@ -6,7 +6,7 @@ import numpy as np
 from app.adapters.image_processing.coordinate_mapper import (
     perspective_bbox_to_equirectangular,
 )
-from app.adapters.tracking.deep_sort_tracking import DeepSortTracker  # tu clase
+from app.adapters.tracking.deep_sort_tracking import DeepSortTracker
 from app.entities.class_names import CLASS_ID_TO_NAME
 from app.typing.class_stats import ClassStats
 
