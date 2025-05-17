@@ -1,5 +1,8 @@
-from typing import List, Dict
+import os
+import cv2
 import numpy as np
+from typing import List, Dict
+from app.adapters.image_processing.coordinate_mapper import perspective_bbox_to_equirectangular
 from app.entities.class_names_es import CLASS_ID_TO_NAME_ES
 
 def non_max_suppression(boxes, scores, iou_threshold=0.5):
@@ -35,9 +38,9 @@ def non_max_suppression(boxes, scores, iou_threshold=0.5):
 
     return keep
 
-def postprocess_detections(detections: List[Dict], iou_threshold=0.5) -> Dict[str, int]:
+def postprocess_detections(detections: List[Dict], original_360_img_path: str, iou_threshold=0.5) -> Dict[str, int]:
     """
-    Receives detections in format:
+    detections: Receives detections in format:
     [
       {
         "filename": "...",
@@ -51,18 +54,39 @@ def postprocess_detections(detections: List[Dict], iou_threshold=0.5) -> Dict[st
       },
       ...
     ]
+    original_360_img_path: path to the original equirectangular image to get size
 
-    Devuelve conteo de objetos por clase con nombres en español.
+    Returns count of objects by class with names in Spanish.
     """
+
+    # Upload 360 image to get resolution
+    img_360 = cv2.imread(original_360_img_path)
+    if img_360 is None:
+        raise FileNotFoundError(f"Original 360 image not found: {original_360_img_path}")
+
+    h_eq, w_eq = img_360.shape[:2]
 
     all_boxes = []
     all_scores = []
     all_class_ids = []
 
-    # All detections together added
+    # For each view, map bboxes to equirectangular coordinates
     for view in detections:
+        yaw = view["yaw"]
+        pitch = view["pitch"]
+        fov = view["fov"]
+
+        # Output size (we assume 512x512, change if it is other)
+        w_out = 512
+        h_out = 512
+
         for det in view["detections"]:
-            all_boxes.append(det["xyxy"])
+            bbox_persp = det["xyxy"]
+            bbox_eq = perspective_bbox_to_equirectangular(
+                bbox_persp, w_out, h_out, yaw, pitch, fov, w_eq, h_eq
+            )
+
+            all_boxes.append(bbox_eq)
             all_scores.append(det["confidence"])
             all_class_ids.append(det["class_id"])
 
@@ -73,9 +97,9 @@ def postprocess_detections(detections: List[Dict], iou_threshold=0.5) -> Dict[st
     scores_np = np.array(all_scores)
     class_ids_np = np.array(all_class_ids)
 
-    # Apply NMS
     final_class_counts = {}
 
+    # Global NMS by class in equirectangular
     for class_id in np.unique(class_ids_np):
         inds = np.where(class_ids_np == class_id)[0]
         boxes_class = boxes_np[inds]
@@ -85,7 +109,7 @@ def postprocess_detections(detections: List[Dict], iou_threshold=0.5) -> Dict[st
 
         final_class_counts[class_id] = len(keep)
 
-    # Transalate IDs to spanish
+    # Translates into Spanish names
     result = {}
     for class_id, count in final_class_counts.items():
         name_es = CLASS_ID_TO_NAME_ES.get(class_id, str(class_id))
