@@ -11,7 +11,6 @@ UPLOAD_FOLDER = "temp_uploads"
 
 
 @preprocess_blueprint.route("/", methods=["POST"])
-@preprocess_blueprint.route("/", methods=["POST"])
 def preprocess():
     """
     Preprocess 360º equirectangular images
