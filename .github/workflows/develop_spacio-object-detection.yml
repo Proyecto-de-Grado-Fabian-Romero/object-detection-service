@@ -64,3 +64,5 @@ jobs:
           app-name: 'spacio-object-detection'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1B1A174C872A43D7919AEC0DD4561379 }}
+          package: .
+          clean: true
