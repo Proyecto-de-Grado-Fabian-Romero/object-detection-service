@@ -1,13 +1,14 @@
+import logging
 import os
 import threading
-import logging
-from flask import Flask
+
 from flasgger import Swagger
+from flask import Flask
 
 from app.routes.detect_routes import detect_blueprint
+from app.routes.detection_consumer import start_detection_consumer
 from app.routes.preprocess_routes import preprocess_blueprint
 from app.routes.process_routes import process_blueprint
-from app.routes.detection_consumer import start_detection_consumer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

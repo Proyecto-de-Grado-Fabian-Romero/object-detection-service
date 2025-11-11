@@ -1,6 +1,7 @@
 import logging
 import os
 from io import BytesIO
+
 import requests
 from PIL import Image
 from werkzeug.utils import secure_filename

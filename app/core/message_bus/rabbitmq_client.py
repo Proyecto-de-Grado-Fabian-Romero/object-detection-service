@@ -1,9 +1,10 @@
 import json
 import logging
-import pika
 import ssl
-from urllib.parse import urlparse
 from typing import Any, Callable, Dict
+from urllib.parse import urlparse
+
+import pika
 
 
 def to_pascal_case(s: str) -> str:
