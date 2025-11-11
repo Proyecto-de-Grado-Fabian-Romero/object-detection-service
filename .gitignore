@@ -46,3 +46,4 @@ Thumbs.db
 *.coverage
 output_views
 temp_uploads
+models
