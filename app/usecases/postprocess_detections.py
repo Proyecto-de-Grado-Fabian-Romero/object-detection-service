@@ -50,9 +50,7 @@ def postprocess_detections_with_tracking(
 
     img_360 = cv2.imread(original_360_img_path)
     if img_360 is None:
-        raise FileNotFoundError(
-            f"Original 360 image not found: {original_360_img_path}"
-        )
+        raise FileNotFoundError(f"Original 360 image not found: {original_360_img_path}")
 
     h_eq, w_eq = img_360.shape[:2]
     tracker = DeepSortTracker()
@@ -102,16 +100,12 @@ def postprocess_detections_with_tracking(
 
     # Prepare detections for DeepSORT
     detections_for_tracking = []
-    for bbox, score, class_id in zip(
-        filtered_boxes, filtered_scores, filtered_class_ids
-    ):
+    for bbox, score, class_id in zip(filtered_boxes, filtered_scores, filtered_class_ids):
         detections_for_tracking.append([bbox, score, class_id])
 
     print(detections_for_tracking)
 
-    detections_for_tracking = [
-        [det[0], det[1], det[2]] for det in detections_for_tracking
-    ]
+    detections_for_tracking = [[det[0], det[1], det[2]] for det in detections_for_tracking]
 
     # Update tracker with equirectangular image and filtered detections
     tracked_objects = tracker.update(img_360, detections_for_tracking)

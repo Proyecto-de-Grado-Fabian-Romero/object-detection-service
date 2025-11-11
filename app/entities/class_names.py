@@ -9,5 +9,5 @@ CLASS_ID_TO_NAME = {
     69: "ove",
     70: "toaster",
     71: "sink",
-    72: "fridge",
+    72: "refrigerator",
 }

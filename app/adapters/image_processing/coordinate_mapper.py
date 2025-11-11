@@ -36,9 +36,7 @@ def perspective_bbox_to_equirectangular(
     yaw_rad = radians(yaw)
     pitch_rad = radians(pitch)
 
-    Ry = np.array(
-        [[cos(yaw_rad), 0, sin(yaw_rad)], [0, 1, 0], [-sin(yaw_rad), 0, cos(yaw_rad)]]
-    )
+    Ry = np.array([[cos(yaw_rad), 0, sin(yaw_rad)], [0, 1, 0], [-sin(yaw_rad), 0, cos(yaw_rad)]])
 
     Rx = np.array(
         [
