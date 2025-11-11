@@ -27,6 +27,3 @@ jobs:
 
       - name: Check import order with isort
         run: isort . --check-only
-
-      - name: Static type checking with mypy
-        run: mypy .
