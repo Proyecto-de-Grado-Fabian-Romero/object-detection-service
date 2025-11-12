@@ -44,7 +44,7 @@ def create_app():
         ],
         "static_url_path": "/flasgger_static",
         "swagger_ui": True,
-        "specs_route": "/docs/"
+        "specs_route": "/docs",
     }
 
     Swagger(app, config=swagger_config)
