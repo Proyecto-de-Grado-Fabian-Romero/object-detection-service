@@ -32,7 +32,22 @@ def create_app():
         "title": "Object Detection API",
         "uiversion": 3,
     }
-    Swagger(app)
+    swagger_config = {
+        "headers": [],
+        "specs": [
+            {
+                "endpoint": "apispec_1",
+                "route": "/docs/apispec_1.json",
+                "rule_filter": lambda rule: True,  # incluir todas las rutas
+                "model_filter": lambda tag: True,  # incluir todos los modelos
+            }
+        ],
+        "static_url_path": "/flasgger_static",
+        "swagger_ui": True,
+        "specs_route": "/docs/"
+    }
+
+    Swagger(app, config=swagger_config)
 
     app.register_blueprint(preprocess_blueprint, url_prefix="/preprocess")
     app.register_blueprint(detect_blueprint, url_prefix="/detect")
