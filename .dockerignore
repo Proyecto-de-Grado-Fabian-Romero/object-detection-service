@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# Model files (downloaded at runtime via YOLO_MODEL_URL)
+models/*.pt
+models/*.onnx
+models/*.engine
+
+# Runtime output directories
+temp_uploads/
+output_views/
+
+# Dev / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Test artifacts
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Docs
+README.md
+*.md

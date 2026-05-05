@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CI/CD: Build → Push to Azure Container Registry → Deploy to Azure Container Apps
+#
+# Required GitHub Secrets:
+#   AZURE_CLIENT_ID         — Service Principal client ID (for OIDC federated login)
+#   AZURE_TENANT_ID         — Azure tenant ID
+#   AZURE_SUBSCRIPTION_ID   — Azure subscription ID
+#   ACR_LOGIN_SERVER        — e.g. myregistry.azurecr.io
+#   ACR_USERNAME            — ACR admin username (or SP client ID)
+#   ACR_PASSWORD            — ACR admin password (or SP client secret)
+#
+# Required GitHub Variables:
+#   AZURE_RESOURCE_GROUP    — Resource group name
+#   CONTAINER_APP_NAME      — Azure Container App name
+#   CONTAINER_APP_ENV       — Azure Container Apps environment name (optional)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Build & Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: object-detection-service
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # required for OIDC login
+      contents: read
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Azure Login (OIDC — no long-lived secrets) ──────────────────────────
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ── Docker login to ACR ─────────────────────────────────────────────────
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # ── Build & push image ──────────────────────────────────────────────────
+      - name: Set image tag
+        id: tag
+        run: echo "TAG=${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.tag.outputs.TAG }}
+            ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+          cache-to: type=inline
+
+      # ── Deploy to Azure Container Apps ──────────────────────────────────────
+      - name: Deploy to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          resourceGroup: ${{ vars.AZURE_RESOURCE_GROUP }}
+          containerAppName: ${{ vars.CONTAINER_APP_NAME }}
+          imageToDeploy: ${{ steps.tag.outputs.TAG }}
+          # Environment variables are managed in Azure Portal / bicep / az CLI.
+          # Do NOT inject secrets via this action — configure them once in Azure.

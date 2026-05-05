@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  object-detection:
+    build: .
+    image: object-detection:local
+    container_name: object-detection
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Mount model directory so the .pt file persists between container restarts
+      - ./models:/app/models
+      # Mount output directories (optional, for local debugging)
+      - ./temp_uploads:/app/temp_uploads
+      - ./output_views:/app/output_views
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # allow time for model download on first start

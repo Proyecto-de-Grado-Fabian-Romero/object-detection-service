@@ -3,7 +3,16 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 
 class DeepSortTracker:
     def __init__(self):
-        self.tracker = DeepSort(max_age=30, n_init=1, max_cosine_distance=0.7)
+        # max_age=5: tracks live 5 frames max (single-frame use, so low value is fine)
+        # n_init=1: confirm track immediately on first detection
+        # max_cosine_distance=0.4: tighter appearance matching reduces false ID merges
+        # nms_max_overlap=0.7: suppress redundant detections fed to tracker
+        self.tracker = DeepSort(
+            max_age=5,
+            n_init=1,
+            max_cosine_distance=0.4,
+            nms_max_overlap=0.7,
+        )
 
     def update(self, img, detections):
         """

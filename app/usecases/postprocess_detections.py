@@ -41,7 +41,7 @@ def non_max_suppression(boxes, scores, iou_threshold=0.5):
 
 
 def postprocess_detections_with_tracking(
-    detections: List[Dict], original_360_img_path: str, iou_threshold=0.05
+    detections: List[Dict], original_360_img_path: str, iou_threshold=0.4
 ) -> Dict[str, ClassStats]:
     """
     Aplica NMS global y luego DeepSORT para tracking.
@@ -102,8 +102,6 @@ def postprocess_detections_with_tracking(
     detections_for_tracking = []
     for bbox, score, class_id in zip(filtered_boxes, filtered_scores, filtered_class_ids):
         detections_for_tracking.append([bbox, score, class_id])
-
-    print(detections_for_tracking)
 
     detections_for_tracking = [[det[0], det[1], det[2]] for det in detections_for_tracking]
 

@@ -1,10 +1,12 @@
 import json
 import logging
 import ssl
+import time
 from typing import Any, Callable, Dict
 from urllib.parse import urlparse
 
 import pika
+from pika.exceptions import AMQPConnectionError, StreamLostError
 
 
 def to_pascal_case(s: str) -> str:
@@ -94,7 +96,7 @@ class RabbitMQClient:
             self.channel.queue_bind(queue=res_queue, exchange=exchange, routing_key=res_queue)
 
             logger.info(
-                "✅ Conectado a RabbitMQ. Exchange='%s', RequestQueue='%s', " "ResponseQueue='%s'",
+                "✅ Conectado a RabbitMQ. Exchange='%s'," " RequestQueue='%s', ResponseQueue='%s'",
                 exchange,
                 req_queue,
                 res_queue,
@@ -104,8 +106,33 @@ class RabbitMQClient:
             logger.exception("❌ Error conectando a RabbitMQ: %s", e)
             raise
 
+    def _reconnect(self, max_retries: int = 10, base_delay: float = 2.0):
+        """Reconectar con backoff exponencial"""
+        self.close()
+        for attempt in range(1, max_retries + 1):
+            delay = min(base_delay * (2 ** (attempt - 1)), 60.0)
+            logger.warning(
+                "🔄 Reconectando (intento %d/%d) en %.0fs...",
+                attempt,
+                max_retries,
+                delay,
+            )
+            time.sleep(delay)
+            try:
+                self._connect()
+                logger.info("✅ Reconexión exitosa en el intento %d", attempt)
+                return
+            except Exception as e:
+                logger.error("❌ Intento %d fallido: %s", attempt, e)
+        raise RuntimeError(
+            "No se pudo reconectar a RabbitMQ" " después de %d intentos" % max_retries
+        )
+
     def consume_requests(self, callback: Callable[[Dict[str, Any]], Dict[str, Any]]):
-        """Consumir mensajes de la cola de requests"""
+        """Consumir mensajes de la cola de requests
+
+        Con reconexión automática.
+        """
         queue = self.config["RABBITMQ_REQUEST_QUEUE"]
 
         def on_request(ch, method, props, body):
@@ -116,12 +143,14 @@ class RabbitMQClient:
                 queue,
                 corr_id,
                 reply_to,
-                len(body),
             )
 
             try:
                 request = json.loads(body)
-                logger.debug("📦 Payload: %s", json.dumps(request, indent=2)[:500])
+                logger.debug(
+                    "📦 Payload: %s",
+                    json.dumps(request, indent=2)[:500],
+                )
 
                 response_data = callback(request)
 
@@ -135,7 +164,7 @@ class RabbitMQClient:
 
                 ch.basic_ack(delivery_tag=method.delivery_tag)
                 logger.info(
-                    "✅ Procesado OK | CorrelationId=%s -> Respuesta enviada a '%s'",
+                    "✅ Procesado OK | CorrelationId=%s" " -> Respuesta enviada a '%s'",
                     corr_id,
                     routing_key,
                 )
@@ -147,21 +176,39 @@ class RabbitMQClient:
                 logger.exception("❌ Error procesando mensaje: %s", e)
                 ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
-        self.channel.basic_qos(prefetch_count=1)
-        self.channel.basic_consume(queue=queue, on_message_callback=on_request, auto_ack=False)
+        while True:
+            try:
+                self.channel.basic_qos(prefetch_count=1)
+                self.channel.basic_consume(
+                    queue=queue,
+                    on_message_callback=on_request,
+                    auto_ack=False,
+                )
+                logger.info(
+                    "👂 Esperando mensajes en '%s'" " (Ctrl+C para detener)...",
+                    queue,
+                )
+                self.channel.start_consuming()
+            except KeyboardInterrupt:
+                logger.warning("🛑 Consumo detenido manualmente.")
+                break
+            except (StreamLostError, AMQPConnectionError) as e:
+                logger.error(
+                    "❌ Conexión perdida: %s" " — intentando reconectar...",
+                    e,
+                )
+                self._reconnect()
+            except Exception as e:
+                logger.exception("❌ Error inesperado en el consumidor: %s", e)
+                self._reconnect()
 
-        logger.info("👂 Esperando mensajes en '%s' (Ctrl+C para detener)...", queue)
-        try:
-            self.channel.start_consuming()
-        except KeyboardInterrupt:
-            logger.warning("🛑 Consumo detenido manualmente.")
-        except Exception as e:
-            logger.exception("❌ Error inesperado en el consumidor: %s", e)
-        finally:
-            self.close()
+        self.close()
 
     def close(self):
         """Cerrar conexión"""
-        if self.connection and not self.connection.is_closed:
-            self.connection.close()
-            logger.info("🔒 Conexión RabbitMQ cerrada correctamente")
+        try:
+            if self.connection and not self.connection.is_closed:
+                self.connection.close()
+                logger.info("🔒 Conexión RabbitMQ cerrada correctamente")
+        except Exception:
+            pass

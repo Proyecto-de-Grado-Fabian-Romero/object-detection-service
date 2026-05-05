@@ -7,8 +7,13 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 
 from app.core.message_bus.rabbitmq_client import RabbitMQClient
-from app.usecases.messages.detection_messages import DetectionRequest, DetectionResponse
-from app.usecases.postprocess_detections import postprocess_detections_with_tracking
+from app.usecases.messages.detection_messages import (
+    DetectionRequest,
+    DetectionResponse,
+)
+from app.usecases.postprocess_detections import (
+    postprocess_detections_with_tracking,
+)
 from app.usecases.preprocess_equirect import preprocess_image
 from app.usecases.run_object_detection import run_detection_on_folder
 
@@ -53,12 +58,17 @@ def process_detection_request(request_data: dict) -> dict:
             os.rmdir(folder)
 
         response = DetectionResponse(
-            request_id=request.request_id, detected_objects=aggregated_objects, success=True
+            request_id=request.request_id,
+            detected_objects=aggregated_objects,
+            success=True,
         )
 
     except Exception as e:
         response = DetectionResponse(
-            request_id=request.request_id, detected_objects={}, success=False, error=str(e)
+            request_id=request.request_id,
+            detected_objects={},
+            success=False,
+            error=str(e),
         )
 
     return response.dict()

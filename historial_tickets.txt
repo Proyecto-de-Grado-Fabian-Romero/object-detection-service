@@ -1,0 +1,17 @@
+e8efef2 | Merge pull request #4 from Proyecto-de-Grado-Fabian-Romero/feature/SPACIO-395/deployment | 2025-11-11
+b60d068 | SPACIO-395 feat: deployment | 2025-11-11
+126bab7 | SPACIO-395 feat: deployment | 2025-11-11
+d7e0d6c | SPACIO-395 feat: deployment | 2025-11-11
+e2b8097 | Merge pull request #3 from Proyecto-de-Grado-Fabian-Romero/feature/SPACIO-280/post-process-detections | 2025-05-17
+a1d1c68 | SPACIO-280 feat: update unused imports | 2025-05-17
+207d31a | SPACIO-280 feat: update exports | 2025-05-17
+17cd3b4 | SPACIO-280 feat: update endpoint adding post process | 2025-05-16
+fbc21a6 | Merge pull request #2 from Proyecto-de-Grado-Fabian-Romero/feature/SPACIO-126/recognize-objects-in-images | 2025-05-16
+01aeab3 | SPACIO-162 feat: detect objects in all pre-process images | 2025-05-16
+1875090 | SPACIO-162 feat: load model | 2025-05-16
+6e91af6 | SPACIO-126 feat: recognize objects in images | 2025-05-16
+98cca68 | Merge pull request #1 from Proyecto-de-Grado-Fabian-Romero/feature/SPACIO-281/pre-process-360-images | 2025-05-16
+4e5ba00 | SPACIO-281 feat: sort imports | 2025-05-16
+2bda6e5 | SPACIO-281 feat: delete unusued vars | 2025-05-16
+a436847 | SPACIO-281 feat: store multiview images | 2025-05-10
+f272190 | SPACIO-281 feat: convert equirectangular to multiview images | 2025-05-10
